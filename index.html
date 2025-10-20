@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>안전한 학교 만들기 – 신문고</title>
+    <meta charset="UTF-8">
+    
+    <!-- Tailwind CSS CDN 제거, 필요한 스타일을 직접 삽입하여 Apps Script 호환성 극대화 -->
+    <style>
+        /* Noto Sans 기본 설정 */
+        body {
+            font-family: "Noto Sans KR", sans-serif;
+            background-color: #e0f2f1; /* 밝은 민트 배경 */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        /* 중앙 컨테이너 스타일 */
+        .container {
+            width: 100%;
+            max-width: 560px;
+            padding: 24px;
+        }
+
+        /* 카드형 폼 스타일 */
+        .card {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-top: 20px;
+        }
+
+        /* 헤더 스타일 */
+        .header {
+            text-align: center;
+            padding: 24px 0;
+        }
+
+        .header h1 {
+            color: #00796b; /* 짙은 녹색 */
+            font-size: 1.875rem; /* 30px */
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #4db6ac; /* 중간 민트색 */
+            font-size: 1rem;
+        }
+
+        /* 폼 요소 스타일 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #004d40; /* 아주 짙은 녹색 */
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #b2dfdb; /* 연한 민트 테두리 */
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #00796b;
+            outline: none;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* 사진 첨부 스타일 */
+        .file-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .file-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            display: none; /* 초기 숨김 */
+        }
+
+        /* 버튼 스타일 */
+        .submit-button {
+            width: 100%;
+            padding: 14px;
+            background-color: #009688; /* 진한 민트색 */
+            color: white;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, opacity 0.2s;
+            font-size: 1.125rem;
+            margin-top: 10px;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background-color: #00796b;
+        }
+
+        .submit-button:disabled {
+            background-color: #b2dfdb;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        /* 유효성/에러 메시지 */
+        .error-message {
+            color: #d32f2f; /* 붉은색 */
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        /* 토스트 알림 스타일 */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            text-align: center;
+        }
+
+        .toast.success {
+            background-color: #388e3c; /* 녹색 성공 */
+        }
+
+        .toast.error {
+            background-color: #d32f2f; /* 붉은색 실패 */
+        }
+        
+        /* 로딩 스피너 (Emoji 사용) */
+        .spinner {
+            display: inline-block;
+            animation: spin 1s infinite linear;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 모바일 최적화 (반응형) */
+        @media (max-width: 600px) {
+            .container {
+                padding: 16px;
+            }
+            .card {
+                margin-top: 10px;
+                padding: 16px;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            .header p {
+                font-size: 0.9rem;
+            }
+            .submit-button {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1>🛡️ 안전한 학교 만들기 – 신문고 🔔</h1>
+            <p>안전하지 않은 장소/상황을 알려주세요. 모두의 안전을 위해 소중히 다루겠습니다.</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <form id="whistleblower-form">
+                    
+                    <!-- 1. 학년 선택 (필수) -->
+                    <div class="form-group">
+                        <label for="grade" class="form-label">학년 선택 (필수) 🎒</label>
+                        <select id="grade" name="grade" class="form-select">
+                            <option value="">-- 학년을 선택하세요 --</option>
+                            <option value="1">1학년</option>
+                            <option value="2">2학년</option>
+                            <option value="3">3학년</option>
+                            <option value="4">4학년</option>
+                            <option value="5">5학년</option>
+                            <option value="6">6학년</option>
+                        </select>
+                        <div id="grade-error" class="error-message"></div>
+                    </div>
+
+                    <!-- 2. 이름 입력 (선택) -->
+                    <div class="form-group">
+                        <label for="name" class="form-label">이름 입력 (실명 또는 별명, 선택)</label>
+                        <input type="text" id="name" name="name" class="form-input" placeholder="실명 또는 익명(예: 용감한 친구)">
+                    </div>
+
+                    <!-- 3. 안전하지 않은 장소 (필수, 최소 2자) -->
+                    <div class="form-group">
+                        <label for="place" class="form-label">안전하지 않은 장소 (필수) 🚧</label>
+                        <input type="text" id="place" name="place" class="form-input" placeholder="예: 운동장 미끄럼틀, 3층 복도 끝">
+                        <div id="place-error" class="error-message"></div>
+                    </div>
+
+                    <!-- 4. 안전하지 않은 이유 (필수, 최소 10자) -->
+                    <div class="form-group">
+                        <label for="reason" class="form-label">안전하지 않은 이유 (필수, 최소 10자) 📝</label>
+                        <textarea id="reason" name="reason" class="form-textarea" placeholder="무엇 때문에 안전하지 않다고 느끼는지 자세히 적어주세요. (최소 10자)"></textarea>
+                        <div id="reason-error" class="error-message"></div>
+                    </div>
+
+                    <!-- 5. 사진 첨부 (선택) -->
+                    <div class="form-group">
+                        <label for="photo" class="form-label">사진 첨부 (선택, 10MB 이하 JPG/PNG) 📸</label>
+                        <input type="file" id="photo" name="photo" class="form-input" accept="image/jpeg, image/png">
+                        <div id="photo-error" class="error-message"></div>
+                        <div class="file-preview-container">
+                            <img id="photo-preview" class="file-preview" alt="사진 미리보기">
+                        </div>
+                    </div>
+                    
+                    <!-- 6. 신고하기 버튼 -->
+                    <button type="submit" id="submit-button" class="submit-button">
+                        신고하기 <span id="spinner" class="spinner" style="display:none;">🔄</span>
+                    </button>
+                </form>
+
+                <!-- 개인정보 최소 수집 고지 -->
+                <p style="text-align: center; font-size: 0.75rem; color: #757575; margin-top: 15px;">
+                    입력 정보는 안전 개선 목적에 한해 활용됩니다. 사진/텍스트는 내부 검토 후 관리됩니다.
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <!-- 토스트 알림 영역 -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Apps Script 웹 앱 URL (사용자님의 최신 배포 URL)
+        const BACKEND_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxZXjPxPW7v53Ig_rlbI5O_pDB9-kGOGdqd-0ZmHjWxSxcJyKaKP8s_0uyAbSnM2fTV/exec";
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+        let isSubmitting = false;
+
+        // --- 유틸리티 함수 ---
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            
+            // 토스트 보이기
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.bottom = '20px';
+            }, 10); // CSS transition delay
+
+            // 토스트 숨기기
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.bottom = '0px';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 300);
+            }, 5000); // 5초 후 숨김
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const data = {
+                grade: document.getElementById('grade').value,
+                place: document.getElementById('place').value.trim(),
+                reason: document.getElementById('reason').value.trim(),
+                photo: document.getElementById('photo').files[0]
+            };
+
+            // Reset errors
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+            // 1. 학년 유효성 검사 (필수)
+            if (!data.grade || data.grade < 1 || data.grade > 6) {
+                document.getElementById('grade-error').textContent = '학년을 반드시 선택해야 합니다.';
+                isValid = false;
+            }
+
+            // 2. 장소 유효성 검사 (필수, 최소 2자)
+            if (data.place.length < 2) {
+                document.getElementById('place-error').textContent = '장소를 최소 2자 이상 입력해야 합니다.';
+                isValid = false;
+            }
+
+            // 3. 이유 유효성 검사 (필수, 최소 10자)
+            if (data.reason.length < 10) {
+                document.getElementById('reason-error').textContent = `이유를 최소 10자 이상 입력해야 합니다. (현재: ${data.reason.length}자)`;
+                isValid = false;
+            }
+
+            // 4. 사진 파일 유효성 검사 (선택이지만, 첨부 시 체크)
+            if (data.photo) {
+                if (data.photo.size > MAX_FILE_SIZE) {
+                    document.getElementById('photo-error').textContent = `파일 크기가 10MB를 초과합니다. (현재: ${(data.photo.size / (1024 * 1024)).toFixed(2)}MB)`;
+                    isValid = false;
+                }
+                const allowedTypes = ['image/jpeg', 'image/png'];
+                if (!allowedTypes.includes(data.photo.type)) {
+                    document.getElementById('photo-error').textContent = 'JPG 또는 PNG 이미지 파일만 첨부할 수 있습니다.';
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+
+        function resetForm() {
+            document.getElementById('whistleblower-form').reset();
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+            const preview = document.getElementById('photo-preview');
+            preview.style.display = 'none';
+            preview.src = '';
+        }
+
+        // --- 이벤트 핸들러 ---
+
+        function handleFileChange(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('photo-preview');
+            const errorElement = document.getElementById('photo-error');
+            
+            errorElement.textContent = '';
+            
+            if (file) {
+                // 미리보기 로직
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+
+                // 파일 크기 유효성 검사
+                if (file.size > MAX_FILE_SIZE) {
+                     errorElement.textContent = `파일 크기가 10MB를 초과합니다. (현재: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`;
+                }
+            } else {
+                preview.style.display = 'none';
+                preview.src = '';
+            }
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+
+            if (isSubmitting) return; // 중복 제출 방지
+
+            if (!validateForm()) {
+                showToast('필수 입력값 또는 유효성 검사를 확인하세요.', 'error');
+                return;
+            }
+
+            isSubmitting = true;
+            const submitButton = document.getElementById('submit-button');
+            const spinner = document.getElementById('spinner');
+            
+            submitButton.disabled = true;
+            submitButton.textContent = '신고 접수 중...';
+            spinner.style.display = 'inline-block';
+
+            const formData = new FormData(event.target);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 45000); // 45초 타임아웃
+
+            try {
+                const response = await fetch(BACKEND_WEB_APP_URL, {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal
+                    // Apps Script는 'Content-Type': 'multipart/form-data' 헤더를 자동으로 처리하므로 생략
+                });
+
+                clearTimeout(timeoutId);
+
+                const data = await response.json();
+                
+                if (response.ok && data.ok) {
+                    showToast('✅ 신고가 성공적으로 접수되었습니다. 감사합니다!', 'success');
+                    resetForm();
+                } else if (response.status === 400) {
+                    // 400: 백엔드 유효성 오류
+                    showToast('⚠️ 입력 오류: ' + (data.error || '입력값을 다시 확인해 주세요.'), 'error');
+                } else if (response.status === 413) {
+                    // 413: 파일 크기 초과 오류 (백엔드에서 확인)
+                    showToast('⚠️ 파일 용량 초과: ' + (data.error || '첨부 파일 크기를 줄여주세요.'), 'error');
+                } else {
+                    // 기타 서버 오류
+                    showToast('❌ 서버 오류 또는 알 수 없는 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', 'error');
+                    console.error('Server error response:', data);
+                }
+
+            } catch (error) {
+                console.error('Submission error:', error);
+                if (error.name === 'AbortError') {
+                    showToast('⏰ 서버 응답 시간이 초과되었습니다. (45초) 백엔드 설정 및 성능을 확인해 주세요.', 'error');
+                } else {
+                    showToast('네트워크 연결 또는 서버 응답에 문제가 있습니다. 다시 시도해 주세요.', 'error');
+                }
+            } finally {
+                isSubmitting = false;
+                submitButton.disabled = false;
+                submitButton.textContent = '신고하기';
+                spinner.style.display = 'none';
+            }
+        }
+
+        // --- 초기화 ---
+
+        window.onload = function() {
+            document.getElementById('whistleblower-form').addEventListener('submit', handleSubmit);
+            document.getElementById('photo').addEventListener('change', handleFileChange);
+            // SPREADSHEET_ID가 설정되어 있는지 사용자에게 알리는 용도의 임시 메시지 (Apps Script 외부 실행 시 유용)
+            // 실제 Apps Script 실행 시에는 보이지 않도록 처리됨
+            console.log("프론트엔드 초기화 완료. 백엔드 URL:", BACKEND_WEB_APP_URL);
+        };
+    </script>
+</body>
+</html>
