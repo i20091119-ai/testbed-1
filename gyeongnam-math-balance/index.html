@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="경남수학문화관 체험전시관용 저울(지렛대) 수학 게임">
+<meta name="theme-color" content="#fdf3f8">
+<title>저울 수학 · 경남수학문화관</title>
+<link rel="icon" href="assets/logo.svg">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══════════════════ 1. 시작 화면 ══════════════════ -->
+  <section class="screen is-active" id="screen-title">
+    <div class="title-deco" aria-hidden="true">
+      <span class="bubble b1">＋</span><span class="bubble b2">−</span>
+      <span class="bubble b3">×</span><span class="bubble b4">÷</span>
+      <span class="bubble b5">＝</span>
+    </div>
+
+    <img class="title-logo" id="title-logo" alt="경남수학문화관">
+
+    <h1 class="title-main">저울 수학</h1>
+    <p class="title-sub">추를 올려 저울을 <b>수평</b>으로 만들어 봐요!</p>
+
+    <div class="title-scale" aria-hidden="true">
+      <div class="ts-beam"><span class="ts-pan l"></span><span class="ts-pan r"></span></div>
+      <div class="ts-pillar"></div><div class="ts-base"></div>
+    </div>
+
+    <div class="title-buttons">
+      <button class="btn btn-xl btn-pink" id="btn-start">🎯 게임 시작</button>
+      <button class="btn btn-lg btn-sky"  id="btn-free">🧪 자유 탐구</button>
+      <button class="btn btn-lg btn-mint" id="btn-help">📖 사용법</button>
+      <button class="btn btn-lg btn-grey" id="btn-settings">⚙️ 설정</button>
+    </div>
+
+    <p class="title-best" id="title-best"></p>
+  </section>
+
+
+  <!-- ══════════════════ 2. 게임 화면 ══════════════════ -->
+  <section class="screen" id="screen-game">
+
+    <!-- 상단 정보 -->
+    <header class="hud">
+      <button class="hud-home" id="btn-home" aria-label="처음으로">🏠</button>
+      <img class="hud-logo" id="hud-logo" alt="경남수학문화관">
+
+      <div class="hud-item" id="hud-progress-box">
+        <span class="hud-label">문제</span>
+        <span class="hud-value"><b id="hud-qnum">1</b><i>/<span id="hud-qtotal">10</span></i></span>
+      </div>
+
+      <div class="hud-item" id="hud-level-box">
+        <span class="hud-label">단계</span>
+        <span class="hud-value" id="hud-level">★☆☆☆☆</span>
+      </div>
+
+      <div class="hud-item hud-score-box">
+        <span class="hud-label">점수</span>
+        <span class="hud-value" id="hud-score">0</span>
+      </div>
+
+      <div class="hud-timer" id="hud-timer">
+        <div class="ring" id="timer-ring"><span id="timer-num">60</span></div>
+      </div>
+    </header>
+
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <!-- 수식 -->
+    <div class="equation-panel">
+      <div class="equation" id="equation"></div>
+      <div class="equation-note" id="equation-note"></div>
+    </div>
+
+    <!-- 저울 -->
+    <div class="stage" id="stage">
+      <div class="scale" id="scale">
+        <div class="beam-wrap" id="beam-wrap">
+          <div class="beam" id="beam">
+            <div class="beam-bar"></div>
+            <div class="beam-cap l"></div><div class="beam-cap r"></div>
+          </div>
+        </div>
+        <div class="pivot"></div>
+        <div class="pillar"></div>
+        <div class="base"><span class="mascot" id="mascot">🐣</span></div>
+
+        <div class="moment-readout" id="moment-readout" hidden>
+          <span class="mr-side" id="mr-left">0</span>
+          <span class="mr-eq" id="mr-eq">≠</span>
+          <span class="mr-side" id="mr-right">0</span>
+        </div>
+      </div>
+
+      <!-- 정답/오답 알림 -->
+      <div class="flash" id="flash" hidden><div class="flash-inner" id="flash-inner"></div></div>
+    </div>
+
+    <!-- 추 보관함 + 버튼 -->
+    <div class="bottom-bar">
+      <div class="tray-wrap">
+        <span class="tray-label">추 보관함</span>
+        <div class="tray" id="tray"></div>
+      </div>
+      <div class="tool-buttons">
+        <button class="btn btn-sm btn-yellow" id="btn-hint">💡 힌트</button>
+        <button class="btn btn-sm btn-grey"   id="btn-reset">↺ 다시</button>
+        <button class="btn btn-sm btn-grey"   id="btn-skip">⏭ 넘기기</button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════ 3. 결과 화면 ══════════════════ -->
+  <section class="screen" id="screen-result">
+    <canvas class="confetti" id="confetti"></canvas>
+    <div class="result-card">
+      <div class="result-emoji" id="result-emoji">🎉</div>
+      <h2 class="result-title" id="result-title">참 잘했어요!</h2>
+      <div class="result-stars" id="result-stars">⭐⭐⭐</div>
+
+      <div class="result-stats">
+        <div class="rs"><span class="rs-label">점수</span><span class="rs-value" id="res-score">0</span></div>
+        <div class="rs"><span class="rs-label">맞힌 문제</span><span class="rs-value" id="res-correct">0</span></div>
+        <div class="rs"><span class="rs-label">최고 단계</span><span class="rs-value" id="res-tier">1</span></div>
+        <div class="rs"><span class="rs-label">최고 기록</span><span class="rs-value" id="res-best">0</span></div>
+      </div>
+
+      <p class="result-msg" id="result-msg"></p>
+
+      <div class="result-buttons">
+        <button class="btn btn-lg btn-pink" id="btn-again">🔁 한 판 더</button>
+        <button class="btn btn-lg btn-grey" id="btn-to-title">🏠 처음으로</button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════ 모달 ══════════════════ -->
+  <div class="modal" id="modal-help" hidden>
+    <div class="modal-card">
+      <h3>📖 놀이 방법</h3>
+      <ol class="help-list">
+        <li><b>화면 위 수식</b>을 읽고 네모(□)에 들어갈 수를 생각해요.</li>
+        <li><b>추 보관함</b>에서 추를 손가락으로 끌어 저울 눈금 위에 놓아요.</li>
+        <li>저울은 <b>무게 × 거리(눈금)</b> 로 기울어요.<br>
+            같은 추라도 <b>바깥쪽 칸</b>에 놓을수록 더 무겁게 작용해요!</li>
+        <li>양쪽이 같아지면 저울이 <b>수평</b>이 되고 정답! 🎉</li>
+      </ol>
+      <div class="help-figure">
+        <div class="hf-eq">3 × <b>4</b> = 6 × <b>2</b></div>
+        <div class="hf-desc">3짜리 추를 <b>4번 칸</b>에 놓은 것과<br>6짜리 추를 <b>2번 칸</b>에 놓은 것은 <b>똑같아요</b>.</div>
+      </div>
+      <p class="help-tip">놓은 추를 <b>톡 누르면</b> 보관함으로 돌아가요.</p>
+      <button class="btn btn-lg btn-pink modal-close" data-close="modal-help">알겠어요!</button>
+    </div>
+  </div>
+
+  <div class="modal" id="modal-settings" hidden>
+    <div class="modal-card">
+      <h3>⚙️ 설정 <small>(선생님용)</small></h3>
+
+      <label class="set-row">
+        <span>한 판 문제 수</span>
+        <select id="set-total"><option value="5">5문제</option><option value="10">10문제</option><option value="15">15문제</option><option value="20">20문제</option></select>
+      </label>
+
+      <label class="set-row">
+        <span>제한 시간</span>
+        <select id="set-timer"><option value="1">사용</option><option value="0">사용 안 함</option></select>
+      </label>
+
+      <label class="set-row">
+        <span>시간 여유</span>
+        <select id="set-timescale"><option value="0.7">빠르게 (×0.7)</option><option value="1">보통 (×1)</option><option value="1.5">넉넉히 (×1.5)</option><option value="2">아주 넉넉히 (×2)</option></select>
+      </label>
+
+      <label class="set-row">
+        <span>난이도</span>
+        <select id="set-tier"><option value="0">자동(점점 어렵게)</option><option value="1">1단계 · 덧셈</option><option value="2">2단계 · 뺄셈</option><option value="3">3단계 · 곱셈/나눗셈</option><option value="4">4단계 · 혼합</option><option value="5">5단계 · 추 2개</option></select>
+      </label>
+
+      <label class="set-row">
+        <span>소리</span>
+        <select id="set-sound"><option value="1">켜기</option><option value="0">끄기</option></select>
+      </label>
+
+      <label class="set-row">
+        <span>계산 값 보여주기</span>
+        <select id="set-readout"><option value="0">숨기기</option><option value="1">보여주기</option></select>
+      </label>
+
+      <div class="set-actions">
+        <button class="btn btn-sm btn-grey" id="btn-reset-best">최고 기록 지우기</button>
+        <button class="btn btn-lg btn-pink modal-close" data-close="modal-settings">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 드래그 중인 추가 여기에 붙습니다 -->
+  <div id="drag-layer"></div>
+</div>
+
+<script src="js/problems.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
