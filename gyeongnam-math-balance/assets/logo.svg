@@ -24,6 +24,8 @@
 
   <text x="96" y="46" font-family="'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif"
         font-size="27" font-weight="800" fill="#2f5aa8">경남수학문화관</text>
+  <!-- textLength 를 지정해 어떤 글꼴에서도 글자가 잘리지 않도록 합니다 -->
   <text x="97" y="72" font-family="'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif"
-        font-size="15" font-weight="600" fill="#7b93b8" letter-spacing="1">GYEONGNAM MATH CENTER</text>
+        font-size="14" font-weight="600" fill="#7b93b8"
+        textLength="186" lengthAdjust="spacingAndGlyphs">GYEONGNAM MATH CENTER</text>
 </svg>
