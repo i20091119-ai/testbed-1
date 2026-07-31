@@ -815,6 +815,10 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 else init();
 
 // 자동 검사용으로 내부 상태를 노출 (게임 동작에는 영향 없음)
-window.__balance = { state: state, cfg: cfg, momentOf: momentOf, RULES: RULES };
+// tools-test-problems-ingame.js 가 문제를 하나씩 불러와 실제로 풀어 보는 데 씁니다.
+window.__balance = {
+  state: state, cfg: cfg, momentOf: momentOf, RULES: RULES,
+  load: loadProblem, blankValue: blankValue,
+};
 
 })();

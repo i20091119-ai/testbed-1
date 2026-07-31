@@ -147,13 +147,13 @@ const makers = {
 };
 
 // ── 트레이(추 보관함) 구성: 정답 추 + 그럴듯한 오답 추 ─────
-function buildTray(place, tier) {
+function candidateTray(place, tier) {
   const need = place.map((p) => p[0]);
   const size = tier <= 2 ? 4 : tier <= 4 ? 5 : 6;
   const tray = need.slice();
   // 정답 근처 값을 먼저 유인책으로 넣는다
   const lures = [];
-  for (const n of need) for (const d of [1, -1, 2, -2]) lures.push(n + d);
+  for (const n of need) for (const d of [1, -1, 2, -2, 3, -3]) lures.push(n + d);
   for (const v of shuffle(lures)) {
     if (tray.length >= size) break;
     if (v >= 1 && v <= MAX_W && !tray.includes(v)) tray.push(v);
@@ -163,6 +163,80 @@ function buildTray(place, tier) {
     const v = ri(1, MAX_W);
     if (!tray.includes(v)) tray.push(v);
   }
+  return shuffle(tray);
+}
+
+/**
+ * 보관함의 추를 열린 칸에 놓아 수평을 만드는 모든 방법을 찾는다.
+ * 게임은 "수평이면 정답"으로 처리하므로, 의도한 배치 말고 다른 방법이 있으면
+ * 아이가 □ 를 맞히지 않고도 통과할 수 있다 → 그런 트레이는 쓰지 않는다.
+ */
+function solutionsOf(p) {
+  const allow = p.showDist ? [1, 2, 3, 4, 5] : [1];
+  const mom = (l) => l.reduce((s, [w, d]) => s + w * d, 0);
+  const baseL = mom(p.fixed.left), baseR = mom(p.fixed.right);
+  const fixedCnt = {};
+  p.fixed.right.forEach(([, d]) => { fixedCnt[d] = (fixedCnt[d] || 0) + 1; });
+
+  const found = new Set();
+  const cur = [];
+  (function rec(i, sum, cnt) {
+    if (found.size > 1) return;                     // 2가지만 찾으면 충분
+    if (i === p.tray.length) {
+      if (cur.length && baseL === baseR + sum) {
+        found.add(cur.map(([w, d]) => `${w}@${d}`).sort().join(','));
+      }
+      return;
+    }
+    rec(i + 1, sum, cnt);                           // 이 추는 쓰지 않는다
+    for (const d of allow) {
+      if ((cnt[d] || 0) + (fixedCnt[d] || 0) >= 3) continue;
+      cnt[d] = (cnt[d] || 0) + 1;
+      cur.push([p.tray[i], d]);
+      rec(i + 1, sum + p.tray[i] * d, cnt);
+      cur.pop();
+      cnt[d] -= 1;
+    }
+  })(0, 0, {});
+  return found;
+}
+
+/**
+ * 풀이가 "의도한 배치 하나뿐"인 보관함을 만든다.
+ *
+ * 오답 유인 후보를 정답에 가까운 순서로 훑으면서, 그 추를 넣어도 여전히
+ * 풀이가 하나뿐인 경우에만 채택한다. 이렇게 하면 "그럴듯하면서도
+ * 다른 정답을 만들지 않는" 가장 가까운 오답들이 선택된다.
+ * 필요한 개수를 채우지 못하면 null → 그 문제는 버린다.
+ */
+function buildUniqueTray(p, tier) {
+  const need = p.place.map((x) => x[0]);
+  const intended = p.place.map(([w, d]) => `${w}@${d}`).sort().join(',');
+  const target = tier <= 2 ? 4 : tier <= 4 ? 5 : 6;
+  const minSize = Math.max(3, need.length + 2);
+
+  // 정답 추만으로도 유일하지 않다면 이 문제는 애초에 성립하지 않는다
+  p.tray = need.slice();
+  const base = solutionsOf(p);
+  if (base.size !== 1 || !base.has(intended)) return null;
+
+  // 오답 유인 후보: 정답에 가까운 값부터, 같은 거리면 무작위로
+  const cands = [];
+  for (let v = 1; v <= MAX_W; v++) {
+    if (need.indexOf(v) >= 0) continue;
+    cands.push({ v: v, d: Math.min.apply(null, need.map((n) => Math.abs(n - v))), r: rnd() });
+  }
+  cands.sort((a, b) => (a.d - b.d) || (a.r - b.r));
+
+  const tray = need.slice();
+  for (const c of cands) {
+    if (tray.length >= target) break;
+    p.tray = tray.concat([c.v]);
+    const sols = solutionsOf(p);
+    if (sols.size === 1 && sols.has(intended)) tray.push(c.v);
+  }
+
+  if (tray.length < minSize) return null;
   return shuffle(tray);
 }
 
@@ -191,6 +265,13 @@ function validate(p) {
   // 놓을 추는 모두 오른쪽, 빈칸은 place[0]
   if (p.blank.side !== 'right' || p.blank.d !== p.place[0][1]) return '빈칸 위치 불일치';
 
+  // 수평을 만드는 방법이 의도한 정답 하나뿐인지
+  {
+    const intended = p.place.map(([w, d]) => `${w}@${d}`).sort().join(',');
+    const sols = solutionsOf(p);
+    if (sols.size !== 1 || !sols.has(intended)) return '정답 말고 다른 방법으로도 수평이 됨';
+  }
+
   // 트레이에 정답 추가 모두 들어 있는지
   const bag = p.tray.slice();
   for (const [w] of p.place) {
@@ -209,26 +290,56 @@ function validate(p) {
   return null;
 }
 
+/**
+ * 문제의 "좋은 정도" (작을수록 좋음)
+ *  · 오답 유인이 정답에서 멀수록 나쁘다 — 정답만 눈에 띄면 찍어서 맞힐 수 있다
+ *  · 보관함이 목표 개수보다 적으면 나쁘다 — 고를 것이 적으면 그만큼 쉬워진다
+ *  · 정답에 아주 가까운 오답(±2)이 하나도 없으면 크게 나쁘다
+ */
+const TRAY_TARGET = { 1: 4, 2: 4, 3: 5, 4: 5, 5: 6 };
+function quality(p) {
+  const need = p.place.map((x) => x[0]);
+  const lures = p.tray.filter((v) => need.indexOf(v) < 0);
+  const dist = lures.map((v) => Math.min.apply(null, need.map((n) => Math.abs(n - v))));
+  const mean = dist.length ? dist.reduce((a, b) => a + b, 0) / dist.length : 9;
+  const short = Math.max(0, TRAY_TARGET[p.tier] - p.tray.length);
+  const noNear = dist.some((d) => d <= 2) ? 0 : 4;
+  return mean + short * 2 + noNear;
+}
+
 // ── 생성 ───────────────────────────────────────────────
+// 후보를 넉넉히 만든 뒤, 단계마다 가장 좋은 20문제만 고른다.
+const POOL = 60000;
 const problems = [];
 let id = 0;
 for (let tier = 1; tier <= 5; tier++) {
-  const seen = new Set();
-  let made = 0, guard = 0;
-  while (made < PER_TIER && guard++ < 400000) {
+  const byKey = new Map();
+  const norm = (l) => l.map((t) => t.join('@')).sort().join(',');
+
+  for (let i = 0; i < POOL; i++) {
     const p = makers[tier]();
     if (!p) continue;
     p.tier = tier;
-    p.tray = buildTray(p.place, tier);
-    const key = JSON.stringify([p.fixed, p.place]);
-    if (seen.has(key)) continue;
-    const err = validate(p);
-    if (err) continue;
-    seen.add(key);
-    p.id = ++id;
-    problems.push(p);
-    made++;
+
+    // 추의 순서만 다른 문제(예: 6+5 와 5+6)는 같은 문제로 본다
+    const key = [norm(p.fixed.left), norm(p.fixed.right), norm(p.place)].join('|');
+
+    // 수평을 만드는 방법이 정답 하나뿐인 보관함을 찾는다 (못 찾으면 문제를 버린다)
+    const tray = buildUniqueTray(p, tier);
+    if (!tray) continue;
+    p.tray = tray;
+    if (validate(p)) continue;
+
+    // 같은 문제가 이미 있으면 더 좋은 쪽만 남긴다
+    const prev = byKey.get(key);
+    if (!prev || quality(p) < quality(prev)) byKey.set(key, p);
   }
+
+  const picked = [...byKey.values()].sort((a, b) => quality(a) - quality(b)).slice(0, PER_TIER);
+  // 화면에 나오는 순서가 품질 순이 되지 않도록 섞는다
+  for (const p of shuffle(picked)) { p.id = ++id; problems.push(p); }
+
+  const made = picked.length;
   if (made < PER_TIER) {
     console.error(`❌ ${tier}단계 문제를 ${made}개밖에 만들지 못했습니다.`);
     process.exit(1);
