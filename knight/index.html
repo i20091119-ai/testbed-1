@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>기사의 여행! 나이트 투어 — 경남수학문화관</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 나이트 말 아이콘 (서체에 기대지 않도록 직접 그린 도형) -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="knight-piece" viewBox="0 0 100 100" fill="currentColor" fill-rule="evenodd">
+    <path d="M58 14 C51 18 45 23 41 29 C36 36 29 40 22 45 C17 49 13 53 14 57 C15 61 20 62 25 61 C29 60 33 59 36 61 C40 64 43 70 45 76 C46 80 47 83 47 85 L79 85 C81 70 81 54 79 41 C77 28 72 17 66 9 L60 20 C60 17 59 15 58 14 Z M38 38 a4 4 0 1 0 0.1 0 Z"/>
+    <rect x="24" y="85" width="60" height="11" rx="4"/>
+  </symbol>
+</svg>
+
+<div id="stage">
+
+  <!-- ══════════ 1. 인원 선택 화면 ══════════ -->
+  <section id="screen-start" class="screen active">
+    <div class="butterfly" aria-hidden="true">🦋</div>
+    <header class="start-logo">
+      <img class="logo-img" src="assets/logo.png" alt="" onerror="this.classList.add('missing')" onload="this.parentElement.classList.add('has-logo')">
+      <div class="logo-text">
+        <span class="logo-gnmc">GNMC</span>
+        <span class="logo-name">경상남도교육청 경남수학문화관</span>
+      </div>
+    </header>
+
+    <div class="start-center">
+      <h1 class="game-title"><span class="title-emoji"><svg class="ki"><use href="#knight-piece"/></svg></span> 기사의 여행</h1>
+      <p class="game-subtitle">5×5 체스판을 ㄱ자로 누비는 나이트 투어</p>
+
+      <p class="pick-label">몇 명이 함께 할까요?</p>
+      <div class="pick-row">
+        <button class="pick-btn p1" data-count="1"><span class="pick-icon"><svg class="ki"><use href="#knight-piece"/></svg></span><span class="pick-text">1인</span><span class="pick-sub">혼자 도전</span></button>
+        <button class="pick-btn p2" data-count="2"><span class="pick-icon"><svg class="ki"><use href="#knight-piece"/></svg><svg class="ki"><use href="#knight-piece"/></svg></span><span class="pick-text">2인</span><span class="pick-sub">둘이 대결</span></button>
+        <button class="pick-btn p3" data-count="3"><span class="pick-icon"><svg class="ki"><use href="#knight-piece"/></svg><svg class="ki"><use href="#knight-piece"/></svg><svg class="ki"><use href="#knight-piece"/></svg></span><span class="pick-text">3인</span><span class="pick-sub">셋이 대결</span></button>
+        <button class="pick-btn p4" data-count="4"><span class="pick-icon"><svg class="ki"><use href="#knight-piece"/></svg><svg class="ki"><use href="#knight-piece"/></svg><svg class="ki"><use href="#knight-piece"/></svg><svg class="ki"><use href="#knight-piece"/></svg></span><span class="pick-text">4인</span><span class="pick-sub">넷이 대결</span></button>
+      </div>
+
+      <div class="howto-tip">💡 화면이 인원수만큼 나뉘고, <b>2분 동안 동시에</b> 각자 자기 보드에서 겨뤄요!</div>
+    </div>
+  </section>
+
+  <!-- ══════════ 2. 규칙 안내 화면 ══════════ -->
+  <section id="screen-rules" class="screen">
+    <header class="start-logo">
+      <img class="logo-img" src="assets/logo.png" alt="" onerror="this.classList.add('missing')" onload="this.parentElement.classList.add('has-logo')">
+      <div class="logo-text">
+        <span class="logo-gnmc">GNMC</span>
+        <span class="logo-name">경상남도교육청 경남수학문화관</span>
+      </div>
+    </header>
+
+    <div class="rules-center">
+      <h2 class="rules-title">📜 이렇게 놀아요</h2>
+      <p id="rules-players" class="rules-players">2인 대결 · 각자 자기 보드</p>
+
+      <div class="howto">
+        <div class="howto-card">
+          <div class="howto-icon">👆</div>
+          <div class="howto-step">1단계</div>
+          <p>내 보드의 <b>아무 칸</b>을<br>눌러서 출발!</p>
+        </div>
+        <div class="howto-card">
+          <div class="howto-icon"><svg class="ki"><use href="#knight-piece"/></svg></div>
+          <div class="howto-step">2단계</div>
+          <p>나이트는 <b>ㄱ자</b>로만!<br>2칸 가고 옆으로 1칸</p>
+        </div>
+        <div class="howto-card">
+          <div class="howto-icon">⭐</div>
+          <div class="howto-step">3단계</div>
+          <p>새 칸마다 <b>10점</b><br>25칸 완주 <b>+100점</b></p>
+        </div>
+        <div class="howto-card">
+          <div class="howto-icon">⏱️</div>
+          <div class="howto-step">4단계</div>
+          <p>제한 시간 <b>2분</b><br>끝나면 점수 순 메달!</p>
+        </div>
+      </div>
+
+      <div class="rules-notes">
+        <div class="rule-note"><b>↩️ 되돌리기</b> 방금 간 한 칸을 무를 수 있어요 (그 칸 10점은 되돌아가요)</div>
+        <div class="rule-note"><b>🔄 새로 시작</b> <u>막혔을 때만</u> 눌려요. 보드는 비워지고 <b>점수는 그대로</b> 남아요</div>
+        <div class="rule-note"><b>🏁 완주하면</b> 보너스 100점을 받고 새 보드로 다시 도전해요</div>
+      </div>
+
+      <div class="rules-btns">
+        <button id="btn-rules-back" class="ghost-btn">◀ 인원 다시 고르기</button>
+        <button id="btn-rules-go" class="big-btn">시작하기 ▶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 3. 게임 화면 ══════════ -->
+  <section id="screen-game" class="screen">
+    <header class="game-header">
+      <div class="header-left">
+        <img class="logo-img small" src="assets/logo.png" alt="" onerror="this.classList.add('missing')">
+      </div>
+      <div class="header-center">
+        <div id="clock" class="clock">2:00</div>
+        <div id="clock-label" class="clock-label">남은 시간</div>
+      </div>
+      <div class="header-right">
+        <button id="btn-howto-game" class="icon-btn" aria-label="게임 방법">❓</button>
+        <button id="btn-pause" class="icon-btn" aria-label="일시정지">⏸</button>
+        <button id="btn-mute" class="icon-btn" aria-label="소리 켜기/끄기">🔊</button>
+        <button id="btn-quit" class="icon-btn" aria-label="처음으로">🏠</button>
+      </div>
+    </header>
+
+    <div class="timer-track"><div id="timer-bar" class="timer-bar"></div></div>
+
+    <div id="boards" class="boards"></div>
+
+    <!-- 카운트다운 -->
+    <div id="countdown-overlay" class="count-overlay hidden">
+      <div id="countdown-num" class="count-num">3</div>
+    </div>
+
+    <!-- 일시정지 -->
+    <div id="pause-overlay" class="ready-overlay hidden">
+      <div class="ready-card">
+        <div class="ready-emoji">⏸</div>
+        <h2 class="ready-title">잠깐 멈췄어요</h2>
+        <p class="ready-desc">시간이 멈춰 있어요.<br>이어서 하면 <b>3-2-1</b> 세고 다시 시작해요!</p>
+        <div class="name-btns">
+          <button id="btn-pause-quit" class="ghost-btn">🏠 처음으로</button>
+          <button id="btn-pause-resume" class="big-btn">이어서 하기 ▶</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 게임 방법 팝업 ══════════ -->
+  <div id="howto-modal" class="modal hidden">
+    <div class="modal-card">
+      <h2 class="modal-title">❓ 게임 방법</h2>
+      <div class="modal-steps">
+        <div class="modal-step">
+          <div class="ms-icon">👆</div><div class="ms-no">1</div>
+          <p><b>아무 칸</b>이나 눌러<br>나이트를 놓아요</p>
+        </div>
+        <div class="modal-step">
+          <div class="ms-icon"><svg class="ki"><use href="#knight-piece"/></svg></div><div class="ms-no">2</div>
+          <p><b>ㄱ자(L자)</b>로만 이동!<br>이미 밟은 칸은 못 가요</p>
+        </div>
+        <div class="modal-step">
+          <div class="ms-icon">⭐</div><div class="ms-no">3</div>
+          <p>새 칸마다 <b>10점</b><br>25칸 완주하면 <b>+100점</b></p>
+        </div>
+        <div class="modal-step">
+          <div class="ms-icon">⏱️</div><div class="ms-no">4</div>
+          <p>다 같이 <b>2분</b>!<br>끝나면 점수 순 메달</p>
+        </div>
+      </div>
+      <div class="modal-tip">💡 막다른 길에 갇혔다면 <b>↩️ 되돌리기</b>로 한 칸 무르거나, <b>🔄 새로 시작</b>으로 보드를 비워요. <b>점수는 그대로</b>예요!</div>
+      <button id="btn-howto-close" class="big-btn">알겠어요!</button>
+    </div>
+  </div>
+
+  <!-- ══════════ 4. 결과 화면 ══════════ -->
+  <section id="screen-result" class="screen">
+    <canvas id="confetti-canvas"></canvas>
+    <div class="result-center">
+      <div id="result-rank" class="result-rank">🏆 시간 종료!</div>
+      <h2 class="result-title">기사의 여행 끝!</h2>
+      <ol id="result-list" class="result-list"></ol>
+      <div class="result-btns">
+        <button id="btn-again" class="big-btn">다시 대결하기 🔄</button>
+        <button id="btn-home" class="big-btn alt">처음으로 🏠</button>
+      </div>
+      <p class="result-logo-line">경상남도교육청 경남수학문화관 · GNMC</p>
+    </div>
+  </section>
+
+</div>
+
+<script src="js/audio.js"></script>
+<script src="js/confetti.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
