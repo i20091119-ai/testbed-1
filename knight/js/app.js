@@ -29,6 +29,34 @@
 
   var MEDALS = ['🥇', '🥈', '🥉'];
 
+  /* ── 이미지 교체 슬롯 ──────────────────────────────────────
+   * 아래 경로에 그림을 넣으면 자동으로 교체되고, 없으면 기본 그래픽이 쓰인다.
+   * 명세는 docs/이미지_에셋_명세서.pdf 참고. */
+  var KNIGHT_IMG = 'assets/pieces/knight-%d.png';   // 플레이어별 나이트 말
+  var MEDAL_IMG = {                                  // 결과 화면 메달
+    '🥇': 'assets/ui/medal-1.png',
+    '🥈': 'assets/ui/medal-2.png',
+    '🥉': 'assets/ui/medal-3.png'
+  };
+  var medalReady = {};
+
+  /* 그림이 실제로 열리면 콜백 — 없으면 아무 일도 일어나지 않는다 */
+  function ifImageExists(src, cb) {
+    var probe = new Image();
+    probe.onload = function () { cb(src); };
+    probe.src = src;
+  }
+
+  Object.keys(MEDAL_IMG).forEach(function (sym) {
+    ifImageExists(MEDAL_IMG[sym], function () { medalReady[sym] = true; });
+  });
+
+  function medalHTML(sym) {
+    return medalReady[sym]
+      ? '<img src="' + MEDAL_IMG[sym] + '" alt="">'
+      : sym;
+  }
+
   /* ── DOM ──────────────────────────────────────────────────── */
   var $ = function (id) { return document.getElementById(id); };
   var stage = $('stage');
@@ -92,6 +120,14 @@
     var panel = document.createElement('div');
     panel.className = 'panel';
     panel.style.setProperty('--pc', def.color);
+
+    /* 플레이어별 나이트 말 그림이 있으면 내장 SVG 대신 쓴다.
+     * CSS 변수 안의 상대 경로는 스타일시트(css/) 기준으로 풀리는 브라우저가 있어
+     * 절대 URL로 바꿔서 넣는다. */
+    ifImageExists(KNIGHT_IMG.replace('%d', idx + 1), function (src) {
+      var abs = new URL(src, document.baseURI).href;
+      panel.style.setProperty('--knight-img', 'url("' + abs + '")');
+    });
 
     var laps = document.createElement('div');
     laps.className = 'laps hidden';
@@ -512,7 +548,7 @@
       li.style.setProperty('--pc', p.def.color);
       li.style.animationDelay = (i * 0.14) + 's';
       li.innerHTML =
-        '<span class="rr-medal">' + (solo ? grade.medal : (MEDALS[rank - 1] || '🎖️')) + '</span>' +
+        '<span class="rr-medal">' + medalHTML(solo ? grade.medal : (MEDALS[rank - 1] || '🎖️')) + '</span>' +
         '<span class="rr-rank">' + (solo ? grade.label : (tied ? '공동 ' : '') + rank + '위') + '</span>' +
         '<span class="rr-name">' + p.def.name + '</span>' +
         '<span class="rr-detail">' + detailText(p) + '</span>' +

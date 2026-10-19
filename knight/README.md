@@ -67,6 +67,25 @@
 효과음에는 기사의 여행 전용으로 `step`(착지) · `undo` · `reset` · `stuck`(막힘) · `tour`(완주) ·
 `countdown` 을 더했습니다.
 
+## 그림 갈아끼우기
+
+기본 그래픽은 전부 코드로 그려져 있지만, 정해진 이름으로 그림을 넣으면 **코드를 고치지 않아도
+그 부분만 자동으로 교체**됩니다. 일부만 넣어도 되고, 파일을 지우면 원래 그래픽으로 돌아옵니다.
+
+**→ 크기·투명도·배치도까지 담은 전체 명세: [`docs/이미지_에셋_명세서.pdf`](docs/이미지_에셋_명세서.pdf)**
+
+| 폴더 | 파일 | 바뀌는 곳 |
+|---|---|---|
+| `assets/ui/` | `bg-start · bg-rules · bg-game · bg-result.png` | 화면 4개의 배경 |
+| `assets/ui/` | `title.png` | 시작 화면 제목 (넣으면 글자 제목이 숨겨짐) |
+| `assets/ui/` | `howto-1~4.png` | 규칙 안내 카드 4장 (카드 통째로) |
+| `assets/ui/` | `cell-light.png · cell-dark.png` | 체스판 밝은 칸 · 어두운 칸 |
+| `assets/ui/` | `panel.png` | 플레이어 보드 패널 바탕 |
+| `assets/ui/` | `medal-1~3.png` | 결과 화면 금·은·동메달 |
+| `assets/pieces/` | `knight-1~4.png` | 플레이어별 나이트 말 |
+
+두 폴더는 아직 없습니다. 직접 만들어 넣고 브라우저를 강력 새로고침(`Ctrl+Shift+R`)하면 반영됩니다.
+
 ## 파일 구성
 
 ```
@@ -76,7 +95,8 @@ knight/
 ├── js/app.js           게임 본체 (규칙·타이머·순위)
 ├── js/audio.js         효과음
 ├── js/confetti.js      결과 화면 색종이
-└── assets/             로고 · 서체
+├── docs/               이미지 에셋 명세서(PDF)
+└── assets/             로고 · 서체 (+ 넣으면 적용되는 ui/, pieces/)
 ```
 
 ## 화면 크기
