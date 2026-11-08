@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1f4e8c">
+<title>A-19 대형 하노이탑</title>
+<script>
+/* =========================================================
+   전시물 내용 — 다른 전시물로 바꿀 때는 이 객체만 고치면 됩니다.
+   ========================================================= */
+const EXHIBIT = {
+  code: "A-19",
+  name: "대형 하노이탑",
+  location: "어드벤처관 1층",
+  museum: "경남수학문화관",
+
+  steps: [
+    "원판은 한 번에 1개, 맨 위에 있는 것만 옮겨요.",
+    "큰 원판은 작은 원판 위에 올릴 수 없어요.",
+    "작은 원판 1개, 2개, 3개…를 한 기둥에 쌓고, 다른 기둥으로 모두 옮기며 몇 번 옮겼는지 세어 봐요."
+  ],
+
+  counter: {
+    title: "몇 번 옮겼을까?",
+    hint: "원판을 하나 옮길 때마다 +1을 눌러요."
+  },
+
+  levels: {
+    low: {
+      label: "저학년",
+      html: `
+        <p>원판 <b>1개</b>는 <b>1번</b>, <b>2개</b>는 <b>3번</b>, <b>3개</b>는 <b>7번</b>이면 다 옮길 수 있어요.</p>
+        <p>1, 3, 7… 숫자가 커지는 데 <b>규칙</b>이 있어요.<br>앞의 수를 <b>두 번 더하고 1을 더하면</b> 다음 수가 돼요.</p>
+        <div class="calc">1 + 1 + 1 = <b>3</b><br>3 + 3 + 1 = <b>7</b></div>
+        <p>이렇게 숫자가 늘어나는 규칙을 찾는 것도 수학이에요.</p>`
+    },
+    high: {
+      label: "고학년",
+      html: `
+        <p>원판 <b>n개</b>를 옮기는 방법</p>
+        <ol class="plan">
+          <li>위의 <b>n−1개</b>를 남는 기둥으로 옮긴다</li>
+          <li>가장 큰 원판 <b>1개</b>를 목표 기둥으로 옮긴다</li>
+          <li><b>n−1개</b>를 다시 그 위로 옮긴다</li>
+        </ol>
+        <p>그래서 <b>(n개 횟수) = 2 × (n−1개 횟수) + 1</b></p>
+        <div class="seq"><span>1</span><span>3</span><span>7</span><span>15</span><span>31</span><span>…</span></div>
+        <p>각 수에 1을 더하면 2, 4, 8, 16, 32 — 2를 거듭 곱한 수예요.<br>그래서 최소 횟수는 <b class="big">2ⁿ − 1</b></p>
+        <details class="more">
+          <summary>더 알아보기 (중·고등)</summary>
+          <p>"n−1개일 때 맞으면 n개일 때도 맞다"를 보이고, 1개일 때 맞는 것을 확인하면 모든 n에서 맞다고 할 수 있어요. 이런 증명 방법을 <b>수학적 귀납법</b>이라고 해요. (고등 수학Ⅰ)</p>
+        </details>`
+    }
+  },
+
+  quiz: {
+    question: "원판이 <b>4개</b>면 최소 몇 번 옮겨야 할까?",
+    options: ["8번", "15번", "16번"],
+    answerIndex: 1,
+    tryText: "골랐나요? 이제 실제 원판 4개로 옮겨 보며 횟수를 세어 봐요.",
+    revealButton: "직접 해 보고 답 보기",
+    explain: "3개를 옮기고(<b>7번</b>), 가장 큰 원판을 옮기고(<b>1번</b>), 다시 3개를 그 위로(<b>7번</b>).<br><b>7 + 1 + 7 = 15</b>"
+  },
+
+  faq: [
+    {
+      q: "하노이탑은 누가 만들었어요?",
+      a: "1883년 프랑스 수학자 에두아르 뤼카가 만든 퍼즐이에요. 원판 64개를 다 옮기면 세상이 끝난다는 이야기도 함께 소개했어요."
+    },
+    {
+      q: "64개를 옮기면 얼마나 걸려요?",
+      a: "최소 2⁶⁴ − 1번, 약 1,800경 번이에요. 1초에 1번씩 쉬지 않고 옮겨도 약 5,800억 년이 걸려요."
+    },
+    {
+      q: "기둥이 4개면 더 빨라져요?",
+      a: "원판이 3개 이상이면 빨라져요. 원판 3개는 기둥 3개일 때 7번, 기둥 4개일 때 5번이면 돼요. 기둥이 4개일 때 최소 횟수를 구하는 방법은 오랫동안 풀리지 않던 문제였어요."
+    }
+  ]
+};
+</script>
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --card: #ffffff;
+    --ink: #1d2433;
+    --muted: #5b6475;
+    --line: #e3ddd0;
+    --brand: #1f4e8c;
+    --brand-soft: #e6eef9;
+    --accent: #e8792b;
+    --good: #2e7d4f;
+    --good-soft: #e5f4ea;
+    --wood: #c9935a;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  main { max-width: 480px; margin: 0 auto; padding: 0 14px 24px; }
+
+  header.top {
+    background: var(--brand);
+    color: #fff;
+    padding: 16px 18px 14px;
+    margin: 0 -14px 12px;
+  }
+  .code { font-size: 17px; font-weight: 700; opacity: .85; letter-spacing: .02em; }
+  h1 { margin: 0; font-size: 28px; line-height: 1.25; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 8px; padding: 4px 12px;
+    background: rgba(255,255,255,.18); border-radius: 999px;
+    font-size: 17px; font-weight: 600;
+  }
+
+  section.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  h2 {
+    margin: 0 0 10px; font-size: 21px; line-height: 1.3;
+    display: flex; align-items: center; gap: 8px;
+  }
+  h2 .num {
+    flex: none; width: 28px; height: 28px; border-radius: 50%;
+    background: var(--brand); color: #fff; font-size: 17px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  p { margin: 0 0 10px; }
+  p:last-child { margin-bottom: 0; }
+
+  ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  ol.steps li {
+    counter-increment: s; position: relative;
+    padding: 8px 0 8px 42px; border-top: 1px dashed var(--line);
+  }
+  ol.steps li:first-child { border-top: 0; padding-top: 2px; }
+  ol.steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 6px;
+    width: 30px; height: 30px; border-radius: 8px;
+    background: var(--accent); color: #fff; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  ol.steps li:first-child::before { top: 0; }
+  .diagram { display: block; width: 100%; height: auto; margin-top: 10px; }
+
+  button {
+    font: inherit; cursor: pointer; min-height: 48px;
+    border-radius: 12px; border: 2px solid transparent;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  .counter { display: flex; align-items: center; gap: 12px; }
+  .count {
+    flex: 1; text-align: center; font-size: 64px; font-weight: 800;
+    line-height: 1; color: var(--brand); font-variant-numeric: tabular-nums;
+  }
+  .count small { display: block; font-size: 17px; font-weight: 600; color: var(--muted); margin-top: 4px; }
+  .counter .btns { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .btn-plus { background: var(--brand); color: #fff; font-size: 26px; font-weight: 800; min-height: 64px; }
+  .btn-plus:active { transform: scale(.97); }
+  .btn-reset { background: #fff; color: var(--muted); border-color: var(--line); font-size: 17px; }
+  .hint { color: var(--muted); font-size: 17px; margin-top: 10px; }
+
+  .tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--brand-soft); border-radius: 12px; padding: 4px; margin-bottom: 12px; }
+  .tabs button { background: transparent; color: var(--brand); font-weight: 700; }
+  .tabs button[aria-selected="true"] { background: var(--brand); color: #fff; }
+  .calc {
+    background: var(--brand-soft); border-radius: 10px; padding: 10px 14px;
+    font-size: 20px; margin: 0 0 10px; font-variant-numeric: tabular-nums;
+  }
+  ol.plan { margin: 0 0 10px; padding-left: 24px; }
+  ol.plan li { margin-bottom: 4px; }
+  .seq { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  .seq span {
+    min-width: 44px; padding: 4px 8px; text-align: center; font-weight: 700;
+    background: var(--brand-soft); color: var(--brand); border-radius: 8px;
+  }
+  .big { font-size: 24px; color: var(--accent); }
+  details.more { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+  details.more summary { min-height: 44px; display: flex; align-items: center; font-weight: 700; color: var(--brand); cursor: pointer; }
+
+  .quiz-q { font-size: 20px; margin-bottom: 12px; }
+  .options { display: grid; gap: 8px; }
+  .options button {
+    background: #fff; border-color: var(--line); color: var(--ink);
+    font-size: 20px; font-weight: 700; text-align: left; padding: 8px 16px;
+  }
+  .options button[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+  .options button.correct { border-color: var(--good); background: var(--good-soft); color: var(--good); }
+  .options button.correct::after { content: "  ✓ 정답"; }
+  .options button:disabled { cursor: default; }
+  .try { margin-top: 12px; padding: 12px 14px; background: #fff6ec; border-radius: 12px; border: 1px solid #f3d6b8; }
+  .reveal { width: 100%; margin-top: 12px; background: var(--accent); color: #fff; font-weight: 800; font-size: 19px; }
+  .reveal:disabled { background: #d9d4cb; color: #7b7466; cursor: not-allowed; }
+  .answer { margin-top: 12px; padding: 12px 14px; background: var(--good-soft); border-radius: 12px; }
+  .answer .verdict { font-weight: 800; font-size: 20px; color: var(--good); margin-bottom: 6px; }
+  [hidden] { display: none !important; }
+
+  .faq details { border-top: 1px solid var(--line); }
+  .faq details:first-of-type { border-top: 0; }
+  .faq summary {
+    list-style: none; min-height: 52px; padding: 10px 32px 10px 0; position: relative;
+    font-weight: 700; cursor: pointer; display: flex; align-items: center;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after {
+    content: "+"; position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    font-size: 26px; color: var(--brand); font-weight: 400;
+  }
+  .faq details[open] summary::after { content: "−"; }
+  .faq details p { padding-bottom: 12px; color: #333a48; }
+
+  footer { text-align: center; color: var(--muted); font-size: 17px; padding: 8px 0 4px; }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div class="code" id="code"></div>
+    <h1 id="name"></h1>
+    <div class="badge" aria-label="전시관 위치">📍 <span id="loc"></span></div>
+  </header>
+
+  <section class="card" aria-labelledby="h-steps">
+    <h2 id="h-steps"><span class="num">1</span>이렇게 해 보세요</h2>
+    <ol class="steps" id="steps"></ol>
+    <svg class="diagram" viewBox="0 0 320 120" role="img" aria-label="기둥 3개와 원판 3개. 왼쪽 기둥에 큰 원판이 아래, 작은 원판이 위에 쌓여 있고, 오른쪽 기둥으로 모두 옮기는 것이 목표입니다.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#e8792b"/>
+        </marker>
+      </defs>
+      <rect x="6" y="96" width="308" height="14" rx="4" fill="#c9935a"/>
+      <rect x="49" y="36" width="12" height="62" rx="5" fill="#2b2f36"/>
+      <rect x="154" y="36" width="12" height="62" rx="5" fill="#2b2f36"/>
+      <rect x="259" y="36" width="12" height="62" rx="5" fill="#2b2f36"/>
+      <rect x="15" y="82" width="80" height="14" rx="7" fill="#2f6fd6"/>
+      <rect x="25" y="68" width="60" height="14" rx="7" fill="#f2c230"/>
+      <rect x="35" y="54" width="40" height="14" rx="7" fill="#7cc242"/>
+      <path d="M70,26 Q160,-4 252,26" fill="none" stroke="#e8792b" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#ah)"/>
+      <text x="55" y="22" text-anchor="middle" font-size="13" fill="#5b6475">처음</text>
+      <text x="265" y="22" text-anchor="middle" font-size="13" fill="#5b6475">목표</text>
+    </svg>
+  </section>
+
+  <section class="card" aria-labelledby="h-count">
+    <h2 id="h-count"><span class="num">2</span><span id="counter-title"></span></h2>
+    <div class="counter">
+      <div class="count" aria-live="polite"><span id="count">0</span><small>번 옮겼어요</small></div>
+      <div class="btns">
+        <button class="btn-plus" id="plus" aria-label="1번 더하기">+1</button>
+        <button class="btn-reset" id="reset">처음부터</button>
+      </div>
+    </div>
+    <p class="hint" id="counter-hint"></p>
+  </section>
+
+  <section class="card" aria-labelledby="h-math">
+    <h2 id="h-math"><span class="num">3</span>어떤 수학일까?</h2>
+    <div class="tabs" role="tablist" aria-label="설명 수준">
+      <button role="tab" id="tab-low" aria-controls="level-body"></button>
+      <button role="tab" id="tab-high" aria-controls="level-body"></button>
+    </div>
+    <div id="level-body" role="tabpanel" aria-live="polite"></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-quiz">
+    <h2 id="h-quiz"><span class="num">4</span>생각 질문</h2>
+    <p class="quiz-q" id="quiz-q"></p>
+    <div class="options" id="options" role="group" aria-label="예측해서 하나 고르기"></div>
+    <p class="try" id="try" hidden></p>
+    <button class="reveal" id="reveal" disabled></button>
+    <div class="answer" id="answer" hidden aria-live="polite"></div>
+  </section>
+
+  <section class="card faq" aria-labelledby="h-faq">
+    <h2 id="h-faq"><span class="num">5</span>자주 묻는 질문</h2>
+    <div id="faq"></div>
+  </section>
+
+  <footer id="museum"></footer>
+</main>
+
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const E = EXHIBIT;
+
+  /* 머리 */
+  document.title = E.code + " " + E.name;
+  $("code").textContent = E.code;
+  $("name").textContent = E.name;
+  $("loc").textContent = E.location;
+  $("museum").textContent = E.museum;
+
+  /* [1] 사용 방법 */
+  $("steps").innerHTML = E.steps.map((s) => "<li>" + s + "</li>").join("");
+
+  /* [2] 횟수 세기 */
+  let count = 0;
+  $("counter-title").textContent = E.counter.title;
+  $("counter-hint").textContent = E.counter.hint;
+  const showCount = () => { $("count").textContent = count; };
+  $("plus").addEventListener("click", () => { count += 1; showCount(); });
+  $("reset").addEventListener("click", () => { count = 0; showCount(); });
+
+  /* [3] 수준 탭 (기본: 저학년) */
+  const tabs = { low: $("tab-low"), high: $("tab-high") };
+  function setLevel(key) {
+    Object.entries(tabs).forEach(([k, btn]) => {
+      btn.setAttribute("aria-selected", String(k === key));
+      btn.tabIndex = k === key ? 0 : -1;
+    });
+    $("level-body").innerHTML = E.levels[key].html;
+  }
+  Object.entries(tabs).forEach(([k, btn]) => {
+    btn.textContent = E.levels[k].label;
+    btn.addEventListener("click", () => setLevel(k));
+  });
+  setLevel("low");
+
+  /* [4] 생각 질문: 예측 → 해 보기 → 답 보기 */
+  const Q = E.quiz;
+  $("quiz-q").innerHTML = Q.question;
+  $("reveal").textContent = Q.revealButton;
+  let picked = null;
+  const optButtons = Q.options.map((text, i) => {
+    const b = document.createElement("button");
+    b.textContent = (i + 1) + ". " + text;
+    b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => {
+      picked = i;
+      optButtons.forEach((ob, j) => ob.setAttribute("aria-pressed", String(j === i)));
+      $("try").textContent = Q.tryText;
+      $("try").hidden = false;
+      $("reveal").disabled = false;
+    });
+    $("options").appendChild(b);
+    return b;
+  });
+  $("reveal").addEventListener("click", () => {
+    if (picked === null) return;
+    const right = picked === Q.answerIndex;
+    optButtons.forEach((b, j) => {
+      b.disabled = true;
+      if (j === Q.answerIndex) b.classList.add("correct");
+    });
+    $("answer").innerHTML =
+      '<div class="verdict">' + (right ? "맞았어요! " : "아쉬워요. ") +
+      "정답은 " + Q.options[Q.answerIndex] + "</div>" + Q.explain;
+    $("answer").hidden = false;
+    $("try").hidden = true;
+    $("reveal").hidden = true;
+  });
+
+  /* [5] 자주 묻는 질문 */
+  $("faq").innerHTML = E.faq
+    .map((f) => "<details><summary>" + f.q + "</summary><p>" + f.a + "</p></details>")
+    .join("");
+})();
+</script>
+</body>
+</html>
