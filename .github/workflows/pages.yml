@@ -25,10 +25,18 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}docent-app-hanoi/
     steps:
       - uses: actions/checkout@v4
+      # 기존 Pages 사이트(균형 게임)는 이 브랜치에서 배포되던 것 — 함께 올려 사라지지 않게 함
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/gyeongnam-math-balance-game-10uwt8
+          path: _existing
       - name: Collect site files
         run: |
+          mkdir -p _site
+          cp -a _existing/. _site/ && rm -rf _site/.git
           mkdir -p _site/docent-app-hanoi
           cp docent-app-hanoi/index.html docent-app-hanoi/qr.png _site/docent-app-hanoi/
+          find _site -type f | sort
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

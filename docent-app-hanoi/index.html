@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#1f4e8c">
+<meta name="theme-color" content="#f7f3ec">
 <title>A-19 대형 하노이탑</title>
 <script>
 /* =========================================================
@@ -80,197 +80,271 @@ const EXHIBIT = {
 };
 </script>
 <style>
+  /* 색은 실물에서: 나무 받침, 검은 쿠션·기둥, 색 원판 */
   :root {
-    --bg: #f4f1ea;
-    --card: #ffffff;
-    --ink: #1d2433;
-    --muted: #5b6475;
-    --line: #e3ddd0;
-    --brand: #1f4e8c;
-    --brand-soft: #e6eef9;
-    --accent: #e8792b;
-    --good: #2e7d4f;
-    --good-soft: #e5f4ea;
-    --wood: #c9935a;
+    --paper: #f7f3ec;
+    --surface: #ffffff;
+    --ink: #1c1f24;
+    --muted: #585e68;
+    --rule: #e4dccd;
+    --wood: #c98d55;
+    --wood-dark: #a86f3c;
+    --cushion: #1f2227;
+    --cushion-ink: #f4efe6;
+    --cushion-muted: #b9b2a6;
+    --disc-orange: #d9581b;
+    --disc-blue: #2f6fd6;
+    --disc-green: #5aa83a;
+    --disc-yellow: #f4c430;
+    --disc-lime: #a6cf45;
+    --disc-mint: #b9dccb;
+    --good: #2b7a46;
+    --good-tint: #e6f3ea;
+    --hint-tint: #fdf3dc;
+    --focus: #d9581b;
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
-    background: var(--bg);
+    background: var(--paper);
     color: var(--ink);
     font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
     font-size: 18px;
     line-height: 1.6;
     word-break: keep-all;
     overflow-wrap: break-word;
-  }
-  main { max-width: 480px; margin: 0 auto; padding: 0 14px 24px; }
-
-  header.top {
-    background: var(--brand);
-    color: #fff;
-    padding: 16px 18px 14px;
-    margin: 0 -14px 12px;
-  }
-  .code { font-size: 17px; font-weight: 700; opacity: .85; letter-spacing: .02em; }
-  h1 { margin: 0; font-size: 28px; line-height: 1.25; }
-  .badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    margin-top: 8px; padding: 4px 12px;
-    background: rgba(255,255,255,.18); border-radius: 999px;
-    font-size: 17px; font-weight: 600;
-  }
-
-  section.card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  h2 {
-    margin: 0 0 10px; font-size: 21px; line-height: 1.3;
-    display: flex; align-items: center; gap: 8px;
-  }
-  h2 .num {
-    flex: none; width: 28px; height: 28px; border-radius: 50%;
-    background: var(--brand); color: #fff; font-size: 17px;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  p { margin: 0 0 10px; }
-  p:last-child { margin-bottom: 0; }
-
-  ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
-  ol.steps li {
-    counter-increment: s; position: relative;
-    padding: 8px 0 8px 42px; border-top: 1px dashed var(--line);
-  }
-  ol.steps li:first-child { border-top: 0; padding-top: 2px; }
-  ol.steps li::before {
-    content: counter(s); position: absolute; left: 0; top: 6px;
-    width: 30px; height: 30px; border-radius: 8px;
-    background: var(--accent); color: #fff; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-  }
-  ol.steps li:first-child::before { top: 0; }
-  .diagram { display: block; width: 100%; height: auto; margin-top: 10px; }
-
-  button {
-    font: inherit; cursor: pointer; min-height: 48px;
-    border-radius: 12px; border: 2px solid transparent;
     -webkit-tap-highlight-color: transparent;
   }
-  button:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  ::selection { background: var(--disc-yellow); color: var(--ink); }
+  main { max-width: 480px; margin: 0 auto; padding: 0 20px 28px; }
+  b, strong { font-weight: 800; }
+  p { margin: 0 0 12px; }
+  p:last-child { margin-bottom: 0; }
+  button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; min-height: 48px; }
+  button:focus-visible, summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 12px; }
 
-  .counter { display: flex; align-items: center; gap: 12px; }
-  .count {
-    flex: 1; text-align: center; font-size: 64px; font-weight: 800;
-    line-height: 1; color: var(--brand); font-variant-numeric: tabular-nums;
+  /* 머리 */
+  header.top { padding: 22px 0 6px; display: flex; align-items: flex-end; gap: 16px; }
+  header.top .text { flex: 1; min-width: 0; }
+  .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 6px; }
+  .code {
+    font-size: 17px; font-weight: 800; letter-spacing: .03em;
+    background: var(--cushion); color: var(--cushion-ink);
+    padding: 1px 10px; border-radius: 8px; font-variant-numeric: tabular-nums;
   }
-  .count small { display: block; font-size: 17px; font-weight: 600; color: var(--muted); margin-top: 4px; }
-  .counter .btns { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-  .btn-plus { background: var(--brand); color: #fff; font-size: 26px; font-weight: 800; min-height: 64px; }
-  .btn-plus:active { transform: scale(.97); }
-  .btn-reset { background: #fff; color: var(--muted); border-color: var(--line); font-size: 17px; }
-  .hint { color: var(--muted); font-size: 17px; margin-top: 10px; }
+  .loc { display: inline-flex; align-items: center; gap: 4px; font-size: 17px; font-weight: 700; color: var(--muted); }
+  .loc svg { width: 18px; height: 18px; flex: none; }
+  h1 { margin: 0; font-size: 34px; line-height: 1.2; font-weight: 900; letter-spacing: -0.02em; }
+  .mark { width: 64px; height: 56px; flex: none; }
 
-  .tabs { display: grid; grid-template-columns: 1fr 1fr; background: var(--brand-soft); border-radius: 12px; padding: 4px; margin-bottom: 12px; }
-  .tabs button { background: transparent; color: var(--brand); font-weight: 700; }
-  .tabs button[aria-selected="true"] { background: var(--brand); color: #fff; }
+  section { padding-top: 26px; }
+  section + section { margin-top: 10px; border-top: 1px solid var(--rule); }
+  h2 { margin: 0 0 14px; font-size: 23px; line-height: 1.3; font-weight: 900; letter-spacing: -0.01em; }
+
+  /* [1] 사용 방법 */
+  ol.steps { list-style: none; margin: 0; padding: 0; }
+  ol.steps li { display: flex; gap: 12px; align-items: flex-start; padding: 6px 0; }
+  ol.steps .n {
+    flex: none; width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 17px; color: #fff; margin-top: -1px;
+    font-variant-numeric: tabular-nums;
+  }
+  ol.steps li:nth-child(1) .n { background: var(--disc-orange); }
+  ol.steps li:nth-child(2) .n { background: var(--disc-blue); }
+  ol.steps li:nth-child(3) .n { background: var(--disc-green); }
+  .diagram { display: block; width: 100%; height: auto; margin-top: 14px; }
+
+  /* [2] 횟수 세기 — 검은 쿠션 받침 */
+  .counter {
+    background: var(--cushion); color: var(--cushion-ink);
+    border-radius: 22px; padding: 18px;
+    box-shadow: 0 10px 24px -12px rgba(31,34,39,.55);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: center;
+  }
+  .count { text-align: center; }
+  .count .num {
+    display: block; font-size: 76px; line-height: 1; font-weight: 900;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.03em;
+  }
+  .count small { display: block; margin-top: 6px; font-size: 17px; font-weight: 700; color: var(--cushion-muted); }
+  .bump { animation: bump .32s cubic-bezier(.16,1,.3,1); }
+  @keyframes bump { from { transform: scale(1.18); color: var(--disc-yellow); } to { transform: scale(1); } }
+  .counter .btns { display: grid; gap: 10px; }
+  .btn-plus {
+    min-height: 72px; border-radius: 999px;
+    background: var(--disc-orange); color: #fff;
+    font-size: 30px; font-weight: 900;
+    box-shadow: inset 0 -5px 0 rgba(0,0,0,.18);
+    transition: transform .12s ease-out;
+  }
+  .btn-plus:active { transform: translateY(2px) scale(.98); }
+  .btn-reset {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    border-radius: 999px; color: var(--cushion-ink); font-size: 17px; font-weight: 700;
+    border: 1.5px solid #4a4e56;
+  }
+  .btn-reset svg { width: 18px; height: 18px; }
+  .hint { color: var(--muted); font-size: 17px; margin-top: 12px; }
+
+  /* [3] 수준 탭 */
+  .tabs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+    background: #ece4d6; border-radius: 14px; padding: 4px; margin-bottom: 18px;
+  }
+  .tabs button { border-radius: 11px; font-weight: 800; color: var(--muted); transition: background .2s ease-out, color .2s ease-out; }
+  .tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 2px 6px -2px rgba(31,34,39,.25); }
   .calc {
-    background: var(--brand-soft); border-radius: 10px; padding: 10px 14px;
-    font-size: 20px; margin: 0 0 10px; font-variant-numeric: tabular-nums;
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 14px;
+    padding: 12px 16px; margin: 0 0 12px;
+    font-size: 22px; line-height: 1.7; font-variant-numeric: tabular-nums;
   }
-  ol.plan { margin: 0 0 10px; padding-left: 24px; }
-  ol.plan li { margin-bottom: 4px; }
-  .seq { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  ol.plan { margin: 0 0 12px; padding-left: 24px; }
+  ol.plan li { margin-bottom: 4px; padding-left: 2px; }
+  ol.plan li::marker { font-weight: 900; color: var(--disc-blue); }
+  .seq { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
   .seq span {
-    min-width: 44px; padding: 4px 8px; text-align: center; font-weight: 700;
-    background: var(--brand-soft); color: var(--brand); border-radius: 8px;
+    min-width: 46px; height: 40px; padding: 0 10px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 19px; font-variant-numeric: tabular-nums;
   }
-  .big { font-size: 24px; color: var(--accent); }
-  details.more { margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
-  details.more summary { min-height: 44px; display: flex; align-items: center; font-weight: 700; color: var(--brand); cursor: pointer; }
+  .seq span:nth-child(1) { background: var(--disc-lime); color: var(--ink); }
+  .seq span:nth-child(2) { background: var(--disc-orange); color: #fff; }
+  .seq span:nth-child(3) { background: var(--disc-blue); color: #fff; }
+  .seq span:nth-child(4) { background: var(--disc-yellow); color: var(--ink); }
+  .seq span:nth-child(5) { background: var(--disc-green); color: #fff; }
+  .seq span:nth-child(6) { background: transparent; color: var(--muted); min-width: 0; }
+  .big { font-size: 28px; font-weight: 900; color: var(--disc-orange); white-space: nowrap; }
+  details.more { margin-top: 14px; border-top: 1px solid var(--rule); }
+  details.more summary {
+    list-style: none; min-height: 48px; display: flex; align-items: center; justify-content: space-between;
+    font-weight: 800; color: var(--disc-blue); cursor: pointer;
+  }
+  details.more summary::-webkit-details-marker { display: none; }
 
-  .quiz-q { font-size: 20px; margin-bottom: 12px; }
+  /* [4] 생각 질문 */
+  .quiz-q { font-size: 22px; line-height: 1.45; font-weight: 700; margin-bottom: 14px; }
   .options { display: grid; gap: 8px; }
   .options button {
-    background: #fff; border-color: var(--line); color: var(--ink);
-    font-size: 20px; font-weight: 700; text-align: left; padding: 8px 16px;
+    display: flex; align-items: center; gap: 12px; text-align: left;
+    min-height: 56px; padding: 8px 16px; border-radius: 14px;
+    background: var(--surface); border: 2px solid var(--rule);
+    font-size: 21px; font-weight: 800;
+    transition: border-color .15s ease-out, background .15s ease-out;
   }
-  .options button[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
-  .options button.correct { border-color: var(--good); background: var(--good-soft); color: var(--good); }
-  .options button.correct::after { content: "  ✓ 정답"; }
+  .options .dot {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid #b8ae9c; display: flex; align-items: center; justify-content: center;
+  }
+  .options button[aria-pressed="true"] { border-color: var(--ink); }
+  .options button[aria-pressed="true"] .dot { border-color: var(--ink); }
+  .options button[aria-pressed="true"] .dot::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); }
+  .options button.correct { border-color: var(--good); background: var(--good-tint); color: var(--good); }
+  .options button.correct .dot { border-color: var(--good); background: var(--good); }
+  .options button.correct .dot::after { content: none; }
+  .options .tag { margin-left: auto; font-size: 17px; }
   .options button:disabled { cursor: default; }
-  .try { margin-top: 12px; padding: 12px 14px; background: #fff6ec; border-radius: 12px; border: 1px solid #f3d6b8; }
-  .reveal { width: 100%; margin-top: 12px; background: var(--accent); color: #fff; font-weight: 800; font-size: 19px; }
-  .reveal:disabled { background: #d9d4cb; color: #7b7466; cursor: not-allowed; }
-  .answer { margin-top: 12px; padding: 12px 14px; background: var(--good-soft); border-radius: 12px; }
-  .answer .verdict { font-weight: 800; font-size: 20px; color: var(--good); margin-bottom: 6px; }
+  .options button:disabled:not(.correct) { color: var(--muted); }
+  .try { margin-top: 14px; padding: 12px 16px; background: var(--hint-tint); border-radius: 14px; }
+  .reveal {
+    width: 100%; margin-top: 14px; min-height: 56px; border-radius: 999px;
+    background: var(--cushion); color: var(--cushion-ink); font-weight: 900; font-size: 19px;
+  }
+  .reveal:disabled { background: #e6dfd2; color: #6b6457; cursor: not-allowed; }
+  .answer { margin-top: 14px; padding: 14px 16px; background: var(--good-tint); border-radius: 14px; animation: rise .4s cubic-bezier(.16,1,.3,1); }
+  .answer .verdict { font-weight: 900; font-size: 21px; color: var(--good); margin-bottom: 6px; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   [hidden] { display: none !important; }
 
-  .faq details { border-top: 1px solid var(--line); }
-  .faq details:first-of-type { border-top: 0; }
+  /* [5] 자주 묻는 질문 */
+  .faq details { border-bottom: 1px solid var(--rule); }
+  .faq details:first-child { border-top: 1px solid var(--rule); }
   .faq summary {
-    list-style: none; min-height: 52px; padding: 10px 32px 10px 0; position: relative;
-    font-weight: 700; cursor: pointer; display: flex; align-items: center;
+    list-style: none; min-height: 56px; padding: 12px 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 800;
   }
   .faq summary::-webkit-details-marker { display: none; }
-  .faq summary::after {
-    content: "+"; position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
-    font-size: 26px; color: var(--brand); font-weight: 400;
-  }
-  .faq details[open] summary::after { content: "−"; }
-  .faq details p { padding-bottom: 12px; color: #333a48; }
+  .chev { width: 22px; height: 22px; flex: none; color: var(--muted); transition: transform .2s ease-out; }
+  details[open] > summary .chev { transform: rotate(180deg); }
+  .faq details p { padding: 0 0 16px; color: #33383f; }
 
-  footer { text-align: center; color: var(--muted); font-size: 17px; padding: 8px 0 4px; }
+  footer {
+    margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    color: var(--muted); font-size: 17px; font-weight: 700;
+  }
+  footer svg { width: 26px; height: 22px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
 </style>
 </head>
 <body>
 <main>
   <header class="top">
-    <div class="code" id="code"></div>
-    <h1 id="name"></h1>
-    <div class="badge" aria-label="전시관 위치">📍 <span id="loc"></span></div>
+    <div class="text">
+      <div class="meta">
+        <span class="code" id="code"></span>
+        <span class="loc">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+          <span id="loc"></span>
+        </span>
+      </div>
+      <h1 id="name"></h1>
+    </div>
+    <svg class="mark" viewBox="0 0 64 56" aria-hidden="true">
+      <rect x="29" y="4" width="6" height="44" rx="3" fill="#1f2227"/>
+      <rect x="20" y="16" width="24" height="9" rx="4.5" fill="#a6cf45"/>
+      <rect x="12" y="25" width="40" height="9" rx="4.5" fill="#f4c430"/>
+      <rect x="4" y="34" width="56" height="9" rx="4.5" fill="#2f6fd6"/>
+      <rect x="0" y="45" width="64" height="9" rx="3" fill="#c98d55"/>
+    </svg>
   </header>
 
-  <section class="card" aria-labelledby="h-steps">
-    <h2 id="h-steps"><span class="num">1</span>이렇게 해 보세요</h2>
+  <section aria-labelledby="h-steps">
+    <h2 id="h-steps">이렇게 해 보세요</h2>
     <ol class="steps" id="steps"></ol>
-    <svg class="diagram" viewBox="0 0 320 120" role="img" aria-label="기둥 3개와 원판 3개. 왼쪽 기둥에 큰 원판이 아래, 작은 원판이 위에 쌓여 있고, 오른쪽 기둥으로 모두 옮기는 것이 목표입니다.">
+    <svg class="diagram" viewBox="0 0 320 128" role="img" aria-label="기둥 3개와 원판 3개. 왼쪽 기둥에 큰 원판이 아래, 작은 원판이 위에 쌓여 있고, 오른쪽 기둥으로 모두 옮기는 것이 목표입니다.">
       <defs>
-        <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-          <path d="M0,0 L10,5 L0,10 z" fill="#e8792b"/>
+        <marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#d9581b"/>
         </marker>
       </defs>
-      <rect x="6" y="96" width="308" height="14" rx="4" fill="#c9935a"/>
-      <rect x="49" y="36" width="12" height="62" rx="5" fill="#2b2f36"/>
-      <rect x="154" y="36" width="12" height="62" rx="5" fill="#2b2f36"/>
-      <rect x="259" y="36" width="12" height="62" rx="5" fill="#2b2f36"/>
-      <rect x="15" y="82" width="80" height="14" rx="7" fill="#2f6fd6"/>
-      <rect x="25" y="68" width="60" height="14" rx="7" fill="#f2c230"/>
-      <rect x="35" y="54" width="40" height="14" rx="7" fill="#7cc242"/>
-      <path d="M70,26 Q160,-4 252,26" fill="none" stroke="#e8792b" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#ah)"/>
-      <text x="55" y="22" text-anchor="middle" font-size="13" fill="#5b6475">처음</text>
-      <text x="265" y="22" text-anchor="middle" font-size="13" fill="#5b6475">목표</text>
+      <path d="M68,30 Q160,0 250,30" fill="none" stroke="#d9581b" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8" marker-end="url(#ah)"/>
+      <text x="55" y="22" text-anchor="middle" font-size="15" font-weight="700" fill="#585e68">처음</text>
+      <text x="265" y="22" text-anchor="middle" font-size="15" font-weight="700" fill="#585e68">목표</text>
+      <rect x="20" y="114" width="12" height="14" fill="#a86f3c"/>
+      <rect x="288" y="114" width="12" height="14" fill="#a86f3c"/>
+      <rect x="8" y="104" width="304" height="12" rx="3" fill="#c98d55"/>
+      <rect x="8" y="94" width="304" height="12" rx="6" fill="#1f2227"/>
+      <rect x="48" y="40" width="14" height="58" rx="7" fill="#1f2227"/>
+      <rect x="153" y="40" width="14" height="58" rx="7" fill="#1f2227"/>
+      <rect x="258" y="40" width="14" height="58" rx="7" fill="#1f2227"/>
+      <rect x="13" y="80" width="84" height="15" rx="7.5" fill="#2f6fd6"/>
+      <rect x="23" y="66" width="64" height="15" rx="7.5" fill="#f4c430"/>
+      <rect x="33" y="52" width="44" height="15" rx="7.5" fill="#a6cf45"/>
     </svg>
   </section>
 
-  <section class="card" aria-labelledby="h-count">
-    <h2 id="h-count"><span class="num">2</span><span id="counter-title"></span></h2>
+  <section aria-labelledby="h-count">
+    <h2 id="h-count"><span id="counter-title"></span></h2>
     <div class="counter">
-      <div class="count" aria-live="polite"><span id="count">0</span><small>번 옮겼어요</small></div>
+      <div class="count" aria-live="polite"><span class="num" id="count">0</span><small>번 옮겼어요</small></div>
       <div class="btns">
         <button class="btn-plus" id="plus" aria-label="1번 더하기">+1</button>
-        <button class="btn-reset" id="reset">처음부터</button>
+        <button class="btn-reset" id="reset">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          처음부터
+        </button>
       </div>
     </div>
     <p class="hint" id="counter-hint"></p>
   </section>
 
-  <section class="card" aria-labelledby="h-math">
-    <h2 id="h-math"><span class="num">3</span>어떤 수학일까?</h2>
+  <section aria-labelledby="h-math">
+    <h2 id="h-math">어떤 수학일까?</h2>
     <div class="tabs" role="tablist" aria-label="설명 수준">
       <button role="tab" id="tab-low" aria-controls="level-body"></button>
       <button role="tab" id="tab-high" aria-controls="level-body"></button>
@@ -278,8 +352,8 @@ const EXHIBIT = {
     <div id="level-body" role="tabpanel" aria-live="polite"></div>
   </section>
 
-  <section class="card" aria-labelledby="h-quiz">
-    <h2 id="h-quiz"><span class="num">4</span>생각 질문</h2>
+  <section aria-labelledby="h-quiz">
+    <h2 id="h-quiz">생각 질문</h2>
     <p class="quiz-q" id="quiz-q"></p>
     <div class="options" id="options" role="group" aria-label="예측해서 하나 고르기"></div>
     <p class="try" id="try" hidden></p>
@@ -287,18 +361,27 @@ const EXHIBIT = {
     <div class="answer" id="answer" hidden aria-live="polite"></div>
   </section>
 
-  <section class="card faq" aria-labelledby="h-faq">
-    <h2 id="h-faq"><span class="num">5</span>자주 묻는 질문</h2>
+  <section class="faq" aria-labelledby="h-faq">
+    <h2 id="h-faq">자주 묻는 질문</h2>
     <div id="faq"></div>
   </section>
 
-  <footer id="museum"></footer>
+  <footer>
+    <svg viewBox="0 0 26 22" aria-hidden="true">
+      <rect x="11" y="1" width="4" height="17" rx="2" fill="#1f2227"/>
+      <rect x="7" y="7" width="12" height="5" rx="2.5" fill="#d9581b"/>
+      <rect x="3" y="12" width="20" height="5" rx="2.5" fill="#2f6fd6"/>
+      <rect x="0" y="17" width="26" height="4" rx="1.5" fill="#c98d55"/>
+    </svg>
+    <span id="museum"></span>
+  </footer>
 </main>
 
 <script>
 (function () {
   const $ = (id) => document.getElementById(id);
   const E = EXHIBIT;
+  const CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 
   /* 머리 */
   document.title = E.code + " " + E.name;
@@ -308,15 +391,21 @@ const EXHIBIT = {
   $("museum").textContent = E.museum;
 
   /* [1] 사용 방법 */
-  $("steps").innerHTML = E.steps.map((s) => "<li>" + s + "</li>").join("");
+  $("steps").innerHTML = E.steps
+    .map((s, i) => '<li><span class="n" aria-hidden="true">' + (i + 1) + "</span><span>" + s + "</span></li>")
+    .join("");
 
   /* [2] 횟수 세기 */
   let count = 0;
   $("counter-title").textContent = E.counter.title;
   $("counter-hint").textContent = E.counter.hint;
-  const showCount = () => { $("count").textContent = count; };
-  $("plus").addEventListener("click", () => { count += 1; showCount(); });
-  $("reset").addEventListener("click", () => { count = 0; showCount(); });
+  const num = $("count");
+  function showCount(bump) {
+    num.textContent = count;
+    if (bump) { num.classList.remove("bump"); void num.offsetWidth; num.classList.add("bump"); }
+  }
+  $("plus").addEventListener("click", () => { count += 1; showCount(true); });
+  $("reset").addEventListener("click", () => { count = 0; showCount(false); });
 
   /* [3] 수준 탭 (기본: 저학년) */
   const tabs = { low: $("tab-low"), high: $("tab-high") };
@@ -326,6 +415,8 @@ const EXHIBIT = {
       btn.tabIndex = k === key ? 0 : -1;
     });
     $("level-body").innerHTML = E.levels[key].html;
+    const more = $("level-body").querySelector("details.more summary");
+    if (more) more.insertAdjacentHTML("beforeend", CHEV);
   }
   Object.entries(tabs).forEach(([k, btn]) => {
     btn.textContent = E.levels[k].label;
@@ -340,7 +431,7 @@ const EXHIBIT = {
   let picked = null;
   const optButtons = Q.options.map((text, i) => {
     const b = document.createElement("button");
-    b.textContent = (i + 1) + ". " + text;
+    b.innerHTML = '<span class="dot" aria-hidden="true"></span><span>' + text + "</span>";
     b.setAttribute("aria-pressed", "false");
     b.addEventListener("click", () => {
       picked = i;
@@ -357,7 +448,10 @@ const EXHIBIT = {
     const right = picked === Q.answerIndex;
     optButtons.forEach((b, j) => {
       b.disabled = true;
-      if (j === Q.answerIndex) b.classList.add("correct");
+      if (j === Q.answerIndex) {
+        b.classList.add("correct");
+        b.insertAdjacentHTML("beforeend", '<span class="tag">정답</span>');
+      }
     });
     $("answer").innerHTML =
       '<div class="verdict">' + (right ? "맞았어요! " : "아쉬워요. ") +
@@ -369,7 +463,7 @@ const EXHIBIT = {
 
   /* [5] 자주 묻는 질문 */
   $("faq").innerHTML = E.faq
-    .map((f) => "<details><summary>" + f.q + "</summary><p>" + f.a + "</p></details>")
+    .map((f) => "<details><summary><span>" + f.q + "</span>" + CHEV + "</summary><p>" + f.a + "</p></details>")
     .join("");
 })();
 </script>
